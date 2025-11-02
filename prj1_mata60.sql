@@ -36,7 +36,10 @@ CREATE TABLE PARTICIPA (
 
 CREATE TABLE PARCEIRO (
   id_parceiro INT,
-  nome VARCHAR(100) NOT NULL,
+  primeiro_nome VARCHAR(50) NOT NULL,
+  nome_meio VARCHAR(50),
+  ultimo_nome VARCHAR(50) NOT NULL,
+  cpf_representante VARCHAR(11) PRIMARY NOT NULL,
   empresa VARCHAR(150) NOT NULL,
   categoria_parceiro CHAR(1) NOT NULL
   id_atividade INT,
