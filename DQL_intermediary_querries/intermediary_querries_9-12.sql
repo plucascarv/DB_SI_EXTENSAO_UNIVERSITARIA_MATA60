@@ -3,8 +3,8 @@
 -- em áreas distintas.
 
 SELECT
-    concat(p.nm_primeiro, " ", p.nm_ultimo) as nm_ouvinte,
-    p.cd_matrícula,
+    concat(p.nm_primeiro,' ',p.nm_ultimo) as nm_ouvinte,
+    p.cd_matricula,
     count(distinct a.nm_area_estudo) as areas_distintas
 FROM
     tb_participante as p
@@ -15,7 +15,7 @@ JOIN
 WHERE
     p.tp_participacao = 'O' and r.is_certificado = 'S'
 GROUP BY
-    p.id_participante, p.nm_primeiro, p.nm_ultimo, p.cd_matrícula
+    p.id_participante, p.nm_primeiro, p.nm_ultimo, p.cd_matricula
 ORDER BY
     areas_distintas desc;
 
@@ -27,7 +27,7 @@ SELECT
     p.tp_participacao,
     count(r.id_participante) as total_inscritos,
     count(r.ds_feedback) as feedbacks_recebidos,
-    round((count(r.ds_feedback)*100)/(count(r.id_participante)),2) as taxa_feedback
+    concat(round((count(r.ds_feedback)*100)/(count(r.id_participante)),2),'%') as taxa_feedback
 FROM
     tb_participante as p
 JOIN
@@ -45,11 +45,13 @@ ORDER BY
 
 SELECT
     a.ds_local,
-    count(r.id_participante) as total_participantes
+    count(r.id_participante) as total_participantes,
     count(case when r.is_certificado = 'S' then 1 end) as total_certificados,
-    round(
-        (count(case when r.is_certificado = 'S' then 1 end)*100)/(count(r.id_participante)),2
-        ) as taxa_certificacao
+    concat(round(
+        (count(case when r.is_certificado = 'S' then 1 end) * 100.0) / 
+        count(r.id_participante),
+        2
+    ),'%') as taxa_certificacao
 FROM
     tb_atividade as a
 JOIN
@@ -67,7 +69,7 @@ ORDER BY
 
 SELECT
     p.id_participante,
-    concat(p.nm_primeiro, " ", p.nm_ultimo) as nm_ouvinte,
+    concat(p.nm_primeiro, ' ', p.nm_ultimo) as nm_ouvinte,
     count(a.id_atividade) as qtd_feedbacks_pendentes
 FROM
     tb_participante as p
