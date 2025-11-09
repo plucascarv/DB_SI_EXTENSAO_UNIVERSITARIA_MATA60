@@ -1,4 +1,3 @@
--- Em relacao a indexacao RL_PARTICIPA, iD_ATIVIDADE, IS_CERTIFICADO, ID_PARTICIPANTE sao candidatos analisando essas consultas
 
 --CONSULTA 1
 --Relatório de atividades com maior participação e taxa de certificação	4.2  Apresentar dados estatísticos sobre participação, presença e emissão de certificados	Fornece dados estatísticos específicos sobre participação e emissão de certificados por atividade
@@ -95,38 +94,73 @@ WHERE rp.IS_CERTIFICADO = 'S'
 GROUP BY p.ID_PARTICIPANTE, nome_completo, p.TP_PARTICIPACAO
 ORDER BY carga_horaria_total DESC;
 
+---CONSULTA 7
+-- (Requisito 7.3) A querry busca analisar a diversidade 
+-- nos ouvintes que concluíram o maior número de atividades
+-- em áreas distintas.
 
----------CONSULTA 7
---Relatório mensal de atividades e participação	4.1  Disponibilizar relatórios sobre impacto e participação	Disponibiliza relatório temporal sobre impacto e participação organizado por períodos
+SELECT
+    CONCAT(P.NM_PRIMEIRO,' ',P.NM_ULTIMO) AS nm_ouvinte,
+    P.CD_MATRICULA,
+    COUNT(DISTINCT A.NM_AREA_ESTUDO) AS areas_distintas
+FROM TB_PARTICIPANTE P
+JOIN RL_PARTICIPA R ON P.ID_PARTICIPANTE = R.ID_PARTICIPANTE
+JOIN TB_ATIVIDADE A ON R.ID_ATIVIDADE = A.ID_ATIVIDADE
+WHERE P.TP_PARTICIPACAO = 'O' AND R.IS_CERTIFICADO = 'S'
+GROUP BY P.ID_PARTICIPANTE, P.NM_PRIMEIRO, P.NM_ULTIMO, P.CD_MATRICULA
+ORDER BY areas_distintas DESC;
 
-SELECT 
-    TO_CHAR(a.DT_ATIVIDADE, 'YYYY-MM') as mes_ano,
-    COUNT(DISTINCT a.ID_ATIVIDADE) as total_atividades,
-    COUNT(DISTINCT rp.ID_PARTICIPANTE) as total_participantes_unicos,
-    COUNT(rp.ID_PARTICIPANTE) as total_inscricoes,
-    COUNT(CASE WHEN rp.IS_CERTIFICADO = 'S' THEN 1 END) as certificados_emitidos,
-    ROUND(COUNT(rp.ID_PARTICIPANTE) * 1.0 / COUNT(DISTINCT a.ID_ATIVIDADE), 2) as media_participantes_por_atividade,
-    ROUND(COUNT(CASE WHEN rp.IS_CERTIFICADO = 'S' THEN 1 END) * 100.0 / COUNT(rp.ID_PARTICIPANTE), 2) as taxa_certificacao_mensal
-FROM TB_ATIVIDADE a
-JOIN RL_PARTICIPA rp ON a.ID_ATIVIDADE = rp.ID_ATIVIDADE
-JOIN TB_PARTICIPANTE p ON rp.ID_PARTICIPANTE = p.ID_PARTICIPANTE
-GROUP BY TO_CHAR(a.DT_ATIVIDADE, 'YYYY-MM')
-ORDER BY mes_ano DESC;
+---CONSULTA 8
 
----------CONSULTA 8
---Parceiros mais ativos por categoria e área de estudo	4.1  Disponibilizar relatórios sobre impacto e participação	Fornece relatório específico sobre o impacto dos parceiros por categoria e área, atendendo ao subitem 4.1
+-- (Requisito 3.1) A querry busca analisar a taxa de respostas
+-- em feedback por tipo de participante, para entender que tipo
+-- de ouvinte deixa mais feedback.
 
-SELECT 
-    par.TP_CATEGORIA,
-    a.NM_AREA_ESTUDO,
-    COUNT(DISTINCT par.ID_PARCEIRO) as total_parceiros,
-    COUNT(DISTINCT par.ID_ATIVIDADE) as total_atividades_apoiadas,
-    COUNT(DISTINCT rp.ID_PARTICIPANTE) as participantes_impactados,
-    COUNT(CASE WHEN rp.IS_CERTIFICADO = 'S' THEN 1 END) as certificados_emitidos,
-    RANK() OVER (PARTITION BY par.TP_CATEGORIA ORDER BY COUNT(DISTINCT par.ID_ATIVIDADE) DESC) as ranking_categoria
-FROM TB_PARCEIRO par
-JOIN TB_ATIVIDADE a ON par.ID_ATIVIDADE = a.ID_ATIVIDADE
-JOIN RL_PARTICIPA rp ON a.ID_ATIVIDADE = rp.ID_ATIVIDADE
-GROUP BY par.TP_CATEGORIA, a.NM_AREA_ESTUDO
-ORDER BY par.TP_CATEGORIA, total_atividades_apoiadas DESC;
+SELECT
+    P.TP_PARTICIPACAO,
+    COUNT(R.ID_PARTICIPANTE) AS total_inscritos,
+    COUNT(R.DS_FEEDBACK) AS feedbacks_recebidos,
+    CONCAT(ROUND((COUNT(R.DS_FEEDBACK)*100.0)/(COUNT(R.ID_PARTICIPANTE)),2),'%') AS taxa_feedback
+FROM TB_PARTICIPANTE P
+JOIN RL_PARTICIPA R ON P.ID_PARTICIPANTE = R.ID_PARTICIPANTE
+JOIN TB_ATIVIDADE A ON R.ID_ATIVIDADE = A.ID_ATIVIDADE
+GROUP BY P.TP_PARTICIPACAO
+ORDER BY taxa_feedback DESC;
 
+---CONSULTA 9
+
+-- (Requisito 4.1) A querry busca analisar o impacto do local e
+-- infraestrutura das atividades na participação e da conclusão
+-- nas mesmas.
+
+SELECT
+    A.DS_LOCAL,
+    COUNT(R.ID_PARTICIPANTE) AS total_participantes,
+    COUNT(CASE WHEN R.IS_CERTIFICADO = 'S' THEN 1 END) AS total_certificados,
+    CONCAT(ROUND(
+        (COUNT(CASE WHEN R.IS_CERTIFICADO = 'S' THEN 1 END) * 100.0) /
+        COUNT(R.ID_PARTICIPANTE),
+        2
+    ),'%') AS taxa_certificacao
+FROM TB_ATIVIDADE A
+JOIN RL_PARTICIPA R ON A.ID_ATIVIDADE = R.ID_ATIVIDADE
+JOIN TB_PARTICIPANTE P ON R.ID_PARTICIPANTE = P.ID_PARTICIPANTE
+GROUP BY A.DS_LOCAL
+ORDER BY total_participantes DESC;
+
+---CONSULTA 10
+
+-- (Requisitos 7.1 e 3.1) A querry busca verificar quantos feedbacks pedem
+-- de ser fornecidos por cada ouvinte que concluiu uma atividade, para poder
+-- implementar um sistema de notificação por email (e.g.).
+
+SELECT
+    P.ID_PARTICIPANTE,
+    CONCAT(P.NM_PRIMEIRO, ' ', P.NM_ULTIMO) AS nm_ouvinte,
+    COUNT(A.ID_ATIVIDADE) AS qtd_feedbacks_pendentes
+FROM TB_PARTICIPANTE P
+JOIN RL_PARTICIPA R ON P.ID_PARTICIPANTE = R.ID_PARTICIPANTE
+JOIN TB_ATIVIDADE A ON R.ID_ATIVIDADE = A.ID_ATIVIDADE
+WHERE P.TP_PARTICIPACAO = 'O' AND R.IS_CERTIFICADO = 'S' AND R.DS_FEEDBACK IS NULL
+GROUP BY P.ID_PARTICIPANTE, P.NM_PRIMEIRO, P.NM_ULTIMO
+ORDER BY qtd_feedbacks_pendentes DESC;
