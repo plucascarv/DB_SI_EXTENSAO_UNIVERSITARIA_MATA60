@@ -1,0 +1,47 @@
+\begin{table}[h!]
+\caption{Plano de Indexação 1}
+\label{tab:plano_index_1}
+\begin{footnotesize}
+\begin{tabular}{|m{30mm}|m{40mm}|m{15mm}|m{60mm}|}
+\hline
+\hspace*{\fill}\textbf{Tabela}\hspace*{\fill} &
+\hspace*{\fill}\textbf{Coluna(s)}\hspace*{\fill} &
+\hspace*{\fill}\textbf{Tipo}\hspace*{\fill} &
+\hspace*{\fill}\textbf{Justificativa}\hspace*{\fill} \\
+\hline
+\texttt{RL\_PARTICIPA} & \texttt{ID\_ATIVIDADE, ID\_PARTICIPANTE} & \multirow{3}{*}{Hash} & Esses três índices compõem a maior parte das consultas e tratam-se dos dados mais extensos das tabelas, com dados sequenciais e uma grande variabilidade. A natureza das queries que usam estes atributos (JOIN e (=)) também se beneficia fortemente por uma indexação com hashing. \\
+\cline{1-2}
+\texttt{TB\_PARTICIPANTE} & \texttt{ID\_PARTICIPANTE} & & \\
+\cline{1-2}
+\texttt{TB\_ATIVIDADE} & \texttt{ID\_ATIVIDADE} & & \\
+\hline
+\texttt{TB\_PARTICIPANTE} & \texttt{TP\_PARTICIPACAO} & \multirow{2}{*}{B+Tree} & Ambos índices são de natureza lexicográfica, e também compõem um número expressivo de consultas. Em especial, consultas que tratam de comparações de range (<= e >=). Assim, se adequam muito bem a uma indexação com B+Tree. \\
+\cline{1-2}
+\texttt{TB\_ATIVIDADE} & \texttt{DT\_ATIVIDADE} & & \\
+\hline
+\end{tabular}
+\end{footnotesize}
+\end{table}
+
+\begin{table}[h!]
+\caption{Plano de Indexação 2}
+\label{tab:plano_index_2}
+\begin{footnotesize}
+\begin{tabular}{|m{30mm}|m{40mm}|m{15mm}|m{60mm}|}
+\hline
+\hspace*{\fill}\textbf{Tabela}\hspace*{\fill} &
+\hspace*{\fill}\textbf{Coluna(s)}\hspace*{\fill} &
+\hspace*{\fill}\textbf{Tipo}\hspace*{\fill} &
+\hspace*{\fill}\textbf{Justificativa}\hspace*{\fill} \\
+\hline
+\texttt{RL\_PARTICIPA} & \texttt{ID\_ATIVIDADE, ID\_PARTICIPANTE} & \multirow{4}{*}{B+Tree} & Nesse cenário, em queries que um \texttt{ID\_ATIVIDADE} de \texttt{TB\_PARCEIRO}, estamos lidando com uma consulta de um elemento que não é PK e, como há uma grande JOIN, já que busca-se esse elemento nas duas tabelas com mais entradas, uma varredura com B+Tree pode auxiliar o processamento. \\
+\cline{1-2}
+\texttt{TB\_PARCEIRO} & \texttt{ID\_ATIVIDADE} & & \\
+\cline{1-2} \cline{4-4}
+\texttt{TB\_PARTICIPANTE} & \texttt{TP\_PARTICIPACAO} & & Analogamente ao que se propõe no Plano 1, ambas variáveis são de natureza lexicográfica, aparecem em grande quantidade e possuem baixa variabilidade (2 ou 3 tipos). Assim uma indexação com B+Tree se mostra mais eficiente que outras. \\
+\cline{1-2}
+\texttt{RL\_PARTICIPA} & \texttt{IS\_CERTIFICADO} & & \\
+\hline
+\end{tabular}
+\end{footnotesize}
+\end{table}

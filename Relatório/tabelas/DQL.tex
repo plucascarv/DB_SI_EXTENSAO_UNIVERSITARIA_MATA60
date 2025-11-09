@@ -1,0 +1,110 @@
+\begin{table}[h!]
+	\caption{Detalhamento da construção das consultas (Parte 1: Q1-Q10)}
+	\label{tab:requisitos_pt1}
+	\begin{footnotesize}
+	\begin{tabular}{|p{8mm}|p{20mm}|p{10mm}|p{40mm}|p{35mm}|p{28mm}|}
+	\hline
+	\hspace*{\fill}\textbf{Nome}\hspace*{\fill} &
+	\hspace*{\fill}\textbf{Tipo}\hspace*{\fill} &
+	\hspace*{\fill}\textbf{Req.}\hspace*{\fill} &
+	\hspace*{\fill}\textbf{Descrição}\hspace*{\fill} &
+	\hspace*{\fill}\textbf{Tabelas}\hspace*{\fill} &
+	\hspace*{\fill}\textbf{Funções}\hspace*{\fill} \\
+	\hline
+	Q1 & Intermediária & 4b & Fornece dados estatísticos específicos sobre participação e emissão de certificados por atividade. & \texttt{TB\_PARTICIPANTE, RL\_PARTICIPA, TB\_ATIVIDADE} & \texttt{JOIN, GROUP BY, COUNT} \\
+	\hline
+	Q2 & Intermediária & 3c & Facilita o acesso rápido ao histórico de atividades concluídas e identifica os participantes mais engajados. & \texttt{TB\_PARTICIPANTE, RL\_PARTICIPA, TB\_ATIVIDADE} & \texttt{JOIN, GROUP BY, COUNT} \\
+	\hline
+	Q3 & Intermediária & 2a & Permite registrar e analisar feedbacks agrupados por tipo de atividade. & \texttt{TB\_PARTICIPANTE, RL\_PARTICIPA, TB\_ATIVIDADE} & \texttt{JOIN, GROUP BY, COUNT} \\
+	\hline
+	Q4 & Intermediária & 4a & Disponibiliza relatório específico sobre o impacto dos parceiros nas atividades. & \texttt{RL\_PARTICIPA, TB\_PARTICIPANTE, RL\_PARTICIPA, TB\_ATIVIDADE} & \texttt{JOIN, GROUP BY, COUNT} \\
+	\hline
+	Q5 & Intermediária & 4b & Apresentar dados estatísticos sobre participação, presença e emissão de certificado. & \texttt{TB\_PARTICIPANTE, RL\_PARTICIPA, TB\_ATIVIDADE} & \texttt{JOIN, GROUP BY, COUNT} \\
+	\hline
+	Q6 & Intermediária & 1c & Permite visualização rápida do histórico cumulativo de atividades concluídas por participante. & \texttt{TB\_PARTICIPANTE, RL\_PARTICIPA, TB\_ATIVIDADE} & \texttt{JOIN, GROUP BY, WINDOW, COUNT} \\
+	\hline
+	Q7 & Intermediária & 1c & Analisa a diversidade nos ouvintes que concluíram o maior número de atividades em áreas distintas. & \texttt{TB\_PARTICIPANTE, RL\_PARTICIPA, TB\_ATIVIDADE} & \texttt{JOIN, GROUP BY, COUNT} \\
+	\hline
+	Q8 & Intermediária & 3a & Analisa a taxa de resposta em feedback por tipo de participante, para entender que tipo de participante deixa mais feedback. & \texttt{TB\_PARTICIPANTE, RL\_PARTICIPA, TB\_ATIVIDADE} & \texttt{JOIN, GROUP BY, COUNT} \\
+	\hline
+	Q9 & Intermediária & 4a & Analisa o impacto do local e infraestrutura das atividades na participação e na conclusão das mesmas. & \texttt{TB\_PARTICIPANTE, RL\_PARTICIPA, TB\_ATIVIDADE} & \texttt{JOIN, GROUP BY, COUNT} \\
+	\hline
+	Q10 & Intermediária & 2a, 3a & Verifica quantos feedbacks pendem de ser fornecidos por cada ouvinte que concluiu uma atividade. & \texttt{TB\_PARTICIPANTE, RL\_PARTICIPA, TB\_ATIVIDADE} & \texttt{JOIN, GROUP BY, COUNT} \\
+	\hline
+	\end{tabular}
+	\end{footnotesize}
+\end{table}
+\newpage
+\begin{table}[h!]
+	\caption{Detalhamento da construção das consultas (Parte 2: Q11-Q20)}
+	\label{tab:requisitos_pt2}
+	\begin{footnotesize}
+	\begin{tabular}{|p{8mm}|p{20mm}|p{10mm}|p{40mm}|p{35mm}|p{28mm}|}
+	\hline
+	\hspace*{\fill}\textbf{Nome}\hspace*{\fill} &
+	\hspace*{\fill}\textbf{Tipo}\hspace*{\fill} &
+	\hspace*{\fill}\textbf{Req.}\hspace*{\fill} &
+	\hspace*{\fill}\textbf{Descrição}\hspace*{\fill} &
+	\hspace*{\fill}\textbf{Tabelas}\hspace*{\fill} &
+	\hspace*{\fill}\textbf{Funções}\hspace*{\fill} \\
+	\hline
+	Q11 & Avançada & 1f & Visa trazer um relatório de impacto e participação por atividade. & \texttt{TB\_PARTICIPANTE, TB\_PARCEIRO, RL\_PARTICIPA, TB\_ATIVIDADE} & \texttt{SUB-CONSULTAS, JOIN, GROUP BY, WINDOW, COUNT} \\
+	\hline
+	Q12 & Avançada & 1d & Gestão de múltiplos instrutores por atividade. & \texttt{TB\_PARTICIPANTE, TB\_PARCEIRO, TB\_ATIVIDADE} & \texttt{SUB-CONSULTAS, JOIN, GROUP BY, WINDOW, COUNT} \\
+	\hline
+	Q13 & Avançada & 1e & Análise de parcerias com empresas e ONGs. & \texttt{TB\_PARTICIPANTE, TB\_PARCEIRO, TB\_ATIVIDADE} & \texttt{SUB-CONSULTAS, JOIN, GROUP BY, COUNT} \\
+	\hline
+	Q14 & Avançada & 1g & Analisa elementos para emissão automática de certificados. & \texttt{TB\_PARTICIPANTE, RL\_PARTICIPA} & \texttt{SUB-CONSULTAS, JOIN, GROUP BY, WINDOW, COUNT} \\
+	\hline
+	Q15 & Avançada & 1c & Dashboard de atividades - status e métricas. & \texttt{TB\_PARTICIPANTE, TB\_PARCEIRO, RL\_PARTICIPA, TB\_ATIVIDADE} & \texttt{SUB-CONSULTAS, JOIN, GROUP BY, WINDOW, COUNT} \\
+	\hline
+	Q16 & Avançada & 1f & Análise de feedback e satisfação por tipo de atividade. & \texttt{TB\_PARTICIPANTE, RL\_PARTICIPA, TB\_ATIVIDADE} & \texttt{SUB-CONSULTAS, JOIN, GROUP BY, WINDOW, COUNT} \\
+	\hline
+	Q17 & Avançada & 1f & Relatório de participação por instituição e área de estudo. & \texttt{TB\_PARTICIPANTE, RL\_PARTICIPA, TB\_ATIVIDADE} & \texttt{SUB-CONSULTAS, JOIN, GROUP BY, WINDOW, COUNT} \\
+	\hline
+	Q18 & Avançada & 1a & Gestão de cronograma e alocação de recursos. & \texttt{TB\_PARTICIPANTE, TB\_PARCEIRO, TB\_ATIVIDADE, RL\_PARTICIPA} & \texttt{SUB-CONSULTAS, JOIN, GROUP BY, WINDOW, COUNT} \\
+	\hline
+	Q19 & Avançada & 1e & Análise de eficiência por tipo de parceria. & \texttt{RL\_PARTICIPA, TB\_PARTICIPANTE, TB\_PARCEIRO, TB\_ATIVIDADE} & \texttt{SUB-CONSULTAS, JOIN, WINDOW, COUNT} \\
+	\hline
+	Q20 & Avançada & 1f & Relatório consolidado para diretoria. & \texttt{TB\_ATIVIDADE, RL\_PARTICIPA, TB\_PARTICIPANTE} & \texttt{JOIN, GROUP BY, COUNT} \\
+	\hline
+	\end{tabular}
+	\end{footnotesize}
+\end{table}
+\newpage
+\begin{table}[h!]
+	\caption{Detalhamento da construção das consultas (Parte 3: Q21-Q30)}
+	\label{tab:requisitos_pt3}
+	\begin{footnotesize}
+	\begin{tabular}{|p{8mm}|p{20mm}|p{10mm}|p{40mm}|p{35mm}|p{28mm}|}
+	\hline
+	\hspace*{\fill}\textbf{Nome}\hspace*{\fill} &
+	\hspace*{\fill}\textbf{Tipo}\hspace*{\fill} &
+	\hspace*{\fill}\textbf{Req.}\hspace*{\fill} &
+	\hspace*{\fill}\textbf{Descrição}\hspace*{\fill} &
+	\hspace*{\fill}\textbf{Tabelas}\hspace*{\fill} &
+	\hspace*{\fill}\textbf{Funções}\hspace*{\fill} \\
+	\hline
+	Q21 & Avançada & 4a, 4b & Relatório sobre impacto e participação. & \texttt{RL\_PARTICIPA, TB\_ATIVIDADE, TB\_PARTICIPANTE} & \texttt{JOIN, GROUP BY, COUNT} \\
+	\hline
+	Q22 & Avançada & 4b & Relatar a emissão de certificados e analisar impacto. & \texttt{RL\_PARTICIPA, TB\_ATIVIDADE, TB\_PARTICIPANTE} & \texttt{JOIN, GROUP BY, COUNT} \\
+	\hline
+	Q23 & Avançada & 2c & Visa controlar o histórico de participação. & \texttt{TB\_PARCEIRO, TB\_ATIVIDADE, RL\_PARTICIPA} & \texttt{JOIN, GROUP BY, WINDOW, COUNT} \\
+	\hline
+	Q24 & Avançada & 1e & Análise e gerenciamento de parcerias com empresas e ONGs. & \texttt{TB\_PARCEIRO, TB\_ATIVIDADE} & \texttt{JOIN, GROUP BY, COUNT} \\
+	\hline
+	Q25 & Avançada & 2a & Busca avaliar feedback dos participantes. & \texttt{TB\_PARTICIPANTE, RL\_PARTICIPA, TB\_ATIVIDADE} & \texttt{SUB-CONSULTAS, JOIN, GROUP BY, COUNT} \\
+	\hline
+	Q26 & Avançada & 2c & Busca analisar os participantes com maior número de certificações. & \texttt{TB\_PARTICIPANTE, RL\_PARTICIPA, TB\_ATIVIDADE} & \texttt{JOIN, GROUP BY, COUNT} \\
+	\hline
+	Q27 & Avançada & 4a & Relatório de desempenho e impacto por tempo médio de atividade por área de estudo. & \texttt{TB\_PARTICIPANTE, RL\_PARTICIPA, TB\_ATIVIDADE} & \texttt{JOIN, GROUP BY, COUNT} \\
+	\hline
+	Q28 & Avançada & 1e, 4a & Busca avaliar a correlação entre participantes e empresas parceiras, com foco no impacto. & \texttt{TB\_ATIVIDADE, TB\_PARCEIRO, TB\_PARTICIPANTE, RL\_PARTICIPA} & \texttt{JOIN, GROUP BY, COUNT} \\
+	\hline
+	Q29 & Avançada & 3a & Visa rankear as atividades com maior número de respostas, feedback. & \texttt{TB\_ATIVIDADE, RL\_PARTICIPA, TB\_PARTICIPANTE} & \texttt{SUB-CONSULTAS, JOIN, GROUP BY, COUNT} \\
+	\hline
+	Q30 & Avançada & 4a, 4b & Analisa a relação entre a instituição e taxa de conclusão de atividades. & \texttt{RL\_PARTICIPA, TB\_PARTICIPANTE} & \texttt{JOIN, GROUP BY, COUNT} \\
+	\hline
+	\end{tabular}
+	\end{footnotesize}
+\end{table}

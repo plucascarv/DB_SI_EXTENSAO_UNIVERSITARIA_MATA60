@@ -1,0 +1,108 @@
+\documentclass{SBCbookchapter}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil,english]{babel}
+\usepackage{graphicx}
+\usepackage{minted}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{hyperref}
+
+\author{Alessandro O. do Nascimento, Daniel A. Melo, Pedro Lucas P. A. Carvalho e Péricles A. Tavares}
+\title{Proposta de Sistema de Informação para Atividades de Extensão Universitária}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This report presents the creation processes, requirements, and objectives for a proposed extension activities management system. Furthermore, it focuses on the aspects related to the modeling, implementation, population and querying of the system's central database; as well as providing clear guidance on how to reproduce the implementing process.
+\end{abstract}
+
+\begin{resumo}
+\begin{otherlanguage}{brazil}
+O presente relatório apresenta o processo de criação, requisitos e objetivos de uma proposta de um sistema para gerenciamento de atividades de extensão para universidades. Ademais, foca-se em apresentar elementos relacionados à modelagem, construção, de população e realização de consultas dentro do banco de dados central do sistema; bem como busca deixar claro como reproduzir a produção.
+\end{otherlanguage}
+\end{resumo}
+
+\section{Introdução}
+O Instituto de Computação da UFBA é notório por realizar diversas atividades de extensão, conduzidas por seus núcleos como o Programa Onda Digital, PROFCOMP e GruPro. Essas iniciativas promovem minicursos, maratonas de programação, workshops e palestras, sempre com objetivo de trazer pessoas de fora do núcleo acadêmico para mais próximo do ambiente de conhecimento que a universidade proporciona. No entanto, por lidar com diferente pessoas, de diferentes associações e diferentes origens e em grande quantidade, surgem desafios organizacionais graves, além da ausência de uma ferramenta específica que cumpra esse propósito.
+
+Assim, ante a tais questões, tanto para garantir o bom funcionamento das propostas, quanto para acompanhar a participação das pessoas e ter uma breve noção do impacto social dessa extensão, propõe-se um sistema de informação dedicado a otimizar e profissionalizar a gestão das atividades de extensão do instituto.
+
+\section{Requisitos}
+\subsection{Estratégia para elaboração}
+Para compreender o que o sistema precisa é primeiro necessário entender o que faz e onde falha. Assim, os requisitos propostos para este sistema vieram da análise de documentos institucionais sobre extensão universitária \cite{forproex_organizacao_2007} e observação profunda de outros sistemas de gerenciamento de atividades semelhantes, como aquele usado pelo Tomorrow UFBA. A equipe então fez um levantamento inicial e desabrochou os ramos partindo dele, chegando à lista final.
+
+\subsection{Listagem de requisitos}
+\input{lista_requisitos}
+
+\section{Mini-mundo}
+A proposta do sistema lida, a princípio, com poucos tipos agentes e elementos, que são essenciais: o participante da atividade, a atividade em si e os parceiros que podem colaborar com as atividades; ainda foi necessário que se adiciona-se um elemento extra, que surge da relação de dois dos agentes, mas essa relação será explicada na Seção 1.4. Partindo dessa ideia, o banco se desenhou de maneira consideravelmente enxuta, propositalmente encurtando o escopo para garantir uma uma flexibilidade interna e fácil manejo dos elementos. As tabelas e suas variáveis tiveram suas nomenclaturas baseadas na política de administração de dados do IBAMA \cite{ibama_mad_relacional_2023}, como exposto na Tabela~\ref{mmund}.
+
+\input{tabelas/mini-mundo}
+
+\section{Modelagem}
+Neste momento, é importante compreender como exatamente as tabelas assumiram sua forma, para tal foi construído um diagrama no Modelo Entidade-Relacionamento (MER) para expressar da melhor forma o banco de dados \cite{elmasri_sistemas_2019}, como é exposto na Figura~\ref{mer}. Então, vemos no MER que os três elementos principais e suas tabelas - Atividade (A), Participante (P), Parceiro (Pr) -, um quarto elemento: a associativa formada por A e P, que gera a tabela RL\_PARTICIPA, a relação Participa (Pp). Esta surge pela natureza da multiplicidade na relação entre as tabelas (n,m), se fazendo necessária uma forma de acomodar entradas da tabela P que podem associadas a múltiplas outras em A, ou seja, o sistemas, como regra, permite que um mesmo participante possa se inscrever, ou seja inscrito, em múltiplas atividades cadastras em P.
+
+\begin{figure}[h!]
+	\centerline{\includegraphics[width=\linewidth]{MER.png}}
+	\caption{Modelo Entidade-Relacionamento}
+	\label{mer}
+\end{figure}
+
+O elemento central do esquema é A, se relacionado também com Pr - onde um parceiro se relaciona com uma atividade, de forma que uma mesma empresa colabora com várias atividade mas não com o mesmo representante, e um atividade colabora com 0 ou múltiplos parceiros (1,n).
+
+Seguindo a notação de Peter Chen \cite{elmasri_sistemas_2019}, vemos atributos de cada tabela representados como círculos ligados ao elemento, aqueles que estão preenchidos são as chaves primárias - elementos únicos que inequivocadamente representam uma única entrada da tabela. As características de tipagem desses atributos e definição de outros tipos de chave estão expressos nas Tabelas 1.2 a 1.5.
+
+\input{tabelas/tipagem}
+
+\section{Implantação}
+Valendo-se de todos elementos definidos até o momento, o banco pode enfim ser construído fisicamente usando SQL ANSII baseado nas diretivas do PostegreSQL. Esse processo de implantanção e construição da Data Definition Languange (DDL) do banco veio após a finalização do MER, então para auxiliar no processo e deixar claro para a equipe o direcionamento produziu-se também um diagrado no Modelo Lógico Relacional, também com notação de Peter Chen \cite{elmasri_sistemas_2019}; como exposto na Figura~\ref{mlr}.
+
+\begin{figure}[h!]
+	\centerline{\includegraphics[width=\linewidth]{MLR.png}}
+	\caption{Modelo Lógico Relacional}
+	\label{mlr}
+\end{figure}
+
+Assim, inicialmente na DDL foram implementadas as tabelas A e P, que não receberiam chaves estrangeiras uma da outras, por estarem relacionados de forma associativa. Suas constraints foram definidas internamente nos comados de CREATE TABLE e abertamente definidas (e.g. ID\_PARTICIPANTE INT CONSTRAINT PK\_TB\_PARTICIPANTE PRIMARY KEY, CD\_CPF\_PARTICIPANTE CONSTRAINT UK\_TB\_PARTICIPANTE\_ CPF UNIQUE) com nomenclatura diferente da coluna da tupla, na busca por facilitação de construção de consultas ao mesmo tempo que se mantém controle das operações internas da linguagem.
+
+A tabela Pp é a única com um relacionamento dominado por outra, pela relação de cardinalidade com A, assim foi ela a escolhida para receber a chave estrangeira de A (ID\_ATIVIDADE). Esta constraint também foi definida abertamente, seguindo as mesmas ideias citadas anteriormente (CONSTRAINT FK\_TB\_PARCEIRO\_TB\_ATIVIDADE FOREIGN KEY ID\_ATIVIDADE REFERENCES TB\_ATIVIDADE ID\_ATIVIDADE). Por fim, a relacional Pr apresenta uma chave primária composta pela agregração de duas outras, estas que são chaves estrangeiras provindas das duas tabelas que formam a relação, A e P. Analogamente, essa constraint foi declarada abertamente (CONSTRAINT PK\_RL\_PARTICIPA PRIMARY KEY (ID\_PARTICIPANTE, ID\_ATIVIDADE)).
+
+É importante ressaltar que os códigos DDL estão em sua íntegra disponibilizados nos Anexos deste documento.
+
+\section{População e Consultas}
+\subsection{Processo de População}
+Chega então o momento de manipular o banco com base na DDL apresentado, para tal, inicialmente, é fundamental que se tenham dados para se trabalhar nessa manipulação. Assim, foram desenvolvidos códigos para gerar a Data Manipulation Language (DML), em específico funções INSERT, para popular o banco; estes usaram a linguagem Python, mas tão somente para gerar a querry INSERT, sem qualquer conexão com o Sistema Gerenciador de Banco de Dados (SGBD). Tanto as funções geradoras quanto a DML então presentes no Anexo.
+
+Uma piscina de prefixos foi fornecida aos códigos geradores e todas as restrições relacionadas à tipagem também foram definidas, fabricando dados o mais verossímeis possível para serem adicionados às tabelas. Foram então adicionadas 5600 entradas em A, 450 em A, 265 em Pr e, por fim, 7512 em Pp. Definiu-se que seriam necessários pelo menos 5000 entradas em pelos menos duas tabelas, para que se pudesse fazer uma análise em uma escala que trouxesse fatores relevantes.
+
+\subsection{Construção de Consultas}
+Agora com as tabelas munidas de dados, se fez necessário verificar a lógica das inserções e modelagem de todo o banco. Foi elaborada então a Data Querrying Language (DQL) para o banco, com um total de 30 consultas; que se dividiam em duas formas: intermediárias (que envolvem no mínimo 3 tabelas e utilizam pelo menos 2 funções dentre JOIN, GROUP BY, WINDOW e COUNT) e avançadas (que envolvem no mínimo 3 tabelas e utilizam pelo menos 3 funções dentre SUB-CONSULTAS, JOIN, GROUP BY, WINDOW e COUNT).
+
+Cada uma das consultas da DQL foi elaborada partindo uma proposta inicial - e.g. "Analisar o impacto do local na taxa de certificação dos participantes" -, para que depois se formasse o código; também se fez um exercício em que se tentava resolver questões semelhantes com consultas diferentes, para uma avaliação também do impacto da forma de se consultar. Absolutamente todas as consultas estão relacionadas a, pelo menos, um dos requisitos propostos na Seção 1.2. Todo o detalhamento dessas consultas está presente nas Tabela 1.6 a 1.8, e a DQL na íntegra está no Anexo.
+
+\input{tabelas/DQL}
+
+\section{Otimização do modelo físico relacional}
+\subsection{Planos de indexação}
+Tendo construído toda a DQL, percebe-se que estão sendo executadas consultas que são consideravelmente pesadas. Isso se mostra especialmente naquelas com a maior tabela do banco, Pp; e potencializado pela natureza das consultas que fazem buscas nas tabelas externas A e P (com JOIN), já que suas chaves primárias são também chaves estrangeiras. Pairam então dúvidas sobre como otimizar o processamento dessas consultas, se há formas manipular os dados de forma que obtenha-se um melhor desempenho e menor tempo de execução dessas querries. A partir disso, foram desenvolvidos planos de indexação para as tabelas do banco, que, além de uma tentativa de otimização, também serviriam para analisar a real atuação de modos de indexação considerados ideais para cada tipo de atributo e consulta \cite{silberschatz_database_2019}.
+
+Ao total foram propostos dois planos, ambos na intenção de auxiliar as consultas de modo mais geral - ao focar-se em indexar elementos como ID\_ATIVIDADE e ID\_PARTICIPANTE -, mas também deixando espaço para outros atributos que aparecem talvez em menor quantidade. Outra característica levada em consideração é o tipo de operação realizada nas consultas JOIN, se, por exemplo, eram de análise de uma faixa (range), inequação e igualdade.
+
+\input{tabelas/index}
+
+\subsection{Verificação de desempenho}
+Para verificar que os planos de indexação geraram impacto de fato no processamento da DQL definiu-se um método. Primeiro, cada uma das querries seria executada 20 vezes em cada um de três cenários: sem nenhuma indexação (baseline), criados os índices como propostos no plano 1 e, analogamente, no plano 2 (a forma exata de como foram feitos no SGBD está no Anexo). Após coletados os dados, foram calculados tempo médio de execução, desvio padrão e, por fim,  speedup para cada plano - valor que representa a taxa de aumento de desempenho do tempo de execução. Todo processo como mostrado nas Tabela 1.11 a 1.13.
+
+\input{tabelas/desempenho}
+
+Por fim, percebeu-se que as propostas de indexação, no contexto geral da DQL, pouco fizeram diferença ou pioraram levemente os resultados - pela grande quantidade de valores de speedup ou abaixo de um ou muito pouco acima. Isto é, com exceção das consultas Q1, Q2 e Q7, que se beneficiaram com um aumento da eficiência em 20\% a, quase, 40\% nos seus tempos, Q17, especificamente no plano 2), que subiu 71\% e Q14, também no plano 2, que subiu 40\%. Temos também expoentes para o lado negativo, como nas consultas avançadas Q12 e Q13 (no plano 1), que caíram cerca de 40\% a 51\%.
+
+\section{Anexo}
+Para reproduzir o projeto é fundamental que o interessado utilize ferramentas semelhantes às que os autores utilizaram, um SGBD de PostgreSQL (PGAdmin, por exemplo). Ademais, todos os códigos mencionado durante as seções anteriores e necessários para construção do banco de dados estão disponíveis e organizados em um repositório GitHub, disponível em \href{https://github.com/plucascarv/DB_SI_EXTENSAO_UNIVERSITARIA_MATA60/tree/main}{DB\_SI\_EXTENSAO\_UNIVERSITARIA\_MATA60}. No repositório também estão disponíveis os resultados de cada uma das rodagens das querries, um arquivo README com instruções diretas de como reproduzir o banco no PGAdmin, bem como o código LaTeX deste relatório.
+
+\bibliographystyle{sbc}
+\bibliography{refs}
+
+\end{document}

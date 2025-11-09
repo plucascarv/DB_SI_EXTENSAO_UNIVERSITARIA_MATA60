@@ -1,0 +1,88 @@
+\begin{table}[h!]
+	\caption{Detalhamento da tabela \texttt{TB\_PARTICIPANTE}.}
+	\label{dictpart}
+	\begin{footnotesize}
+	\begin{tabular}{|p{40mm}|p{40mm}|p{45mm}|}
+	\hline
+	\hspace*{\fill}\textbf{Nome Variável}\hspace*{\fill} &
+	\hspace*{\fill}\textbf{Tipagem}\hspace*{\fill} &
+	\hspace*{\fill}\textbf{Tipo Chave}\hspace*{\fill} \\
+	\hline
+	\texttt{ID\_PARTICIPANTE} & \texttt{INT} & Primária \\ \hline
+	\texttt{NM\_PRIMEIRO} & \texttt{VARCHAR(30)} & - \\ \hline
+	\texttt{NM\_MEIO} & \texttt{VARCHAR(30)} & - \\ \hline
+	\texttt{NM\_ULTIMO} & \texttt{VARCHAR(30)} & - \\ \hline
+	\texttt{CD\_CPF\_PARTICIPANTE} & \texttt{CHAR(11)} & Única \\ \hline
+	\texttt{DT\_NASCIMENTO} & \texttt{DATE} & - \\ \hline
+	\texttt{DS\_ENDERECO} & \texttt{VARCHAR(150)} & - \\ \hline
+	\texttt{TP\_GENERO} & \texttt{CHAR(1)} & - \\ \hline
+	\texttt{TP\_PARTICIPACAO} & \texttt{CHAR(1)} & - \\ \hline
+	\texttt{CD\_MATRICULA} & \texttt{VARCHAR(9)} & Única \\ \hline
+	\texttt{NM\_INSTITUICAO} & \texttt{VARCHAR(30)} & - \\ \hline
+	\end{tabular}
+	\end{footnotesize}
+\end{table}
+
+\begin{table}[h!]
+	\caption{Detalhamento da tabela \texttt{RL\_PARTICIPA}.}
+	\label{dictptcp}
+	\begin{footnotesize}
+	\begin{tabular}{|p{40mm}|p{40mm}|p{45mm}|}
+	\hline
+	\hspace*{\fill}\textbf{Nome Variável}\hspace*{\fill} &
+	\hspace*{\fill}\textbf{Tipagem}\hspace*{\fill} &
+	\hspace*{\fill}\textbf{Tipo Chave}\hspace*{\fill} \\
+	\hline
+	\texttt{ID\_PARTICIPANTE} & \texttt{INT} & Primária / Estrangeira \\ \hline
+	\texttt{ID\_ATIVIDADE} & \texttt{INT} & Primária / Estrangeira \\ \hline
+	\texttt{IS\_CERTIFICADO} & \texttt{CHAR(1)} & - \\ \hline
+	\texttt{DS\_FEEDBACK} & \texttt{VARCHAR(400)} & - \\ \hline
+	\end{tabular}
+	\end{footnotesize}
+\end{table}
+
+\begin{table}[h!]
+	\caption{Detalhamento da tabela \texttt{TB\_ATIVIDADE}.}
+	\label{dictatv}
+	\begin{footnotesize}
+	\begin{tabular}{|p{40mm}|p{40mm}|p{45mm}|}
+	\hline
+	\hspace*{\fill}\textbf{Nome Variável}\hspace*{\fill} &
+	\hspace*{\fill}\textbf{Tipagem}\hspace*{\fill} &
+	\hspace*{\fill}\textbf{Tipo Chave}\hspace*{\fill} \\
+	\hline
+	\texttt{ID\_ATIVIDADE} & \texttt{INT} & Primária \\ \hline
+	\texttt{DT\_ATIVIDADE} & \texttt{DATE} & - \\ \hline
+	\texttt{HR\_ATIVIDADE} & \texttt{TIME} & - \\ \hline
+	\texttt{DS\_LOCAL} & \texttt{VARCHAR(150)} & - \\ \hline
+	\texttt{TP\_ATIVIDADE} & \texttt{CHAR(1)} & - \\ \hline
+	\texttt{NM\_AREA\_ESTUDO} & \texttt{VARCHAR(30)} & - \\ \hline
+	\texttt{NM\_ATIVIDADE} & \texttt{VARCHAR(150)} & - \\ \hline
+	\texttt{CARGA\_HORARIA} & \texttt{INT} & - \\ \hline
+	\texttt{DS\_ATIVIDADE} & \texttt{VARCHAR(400)} & - \\ \hline
+	\texttt{DS\_RELATORIO} & \texttt{VARCHAR(400)} & - \\ \hline
+	\end{tabular}
+	\end{footnotesize}
+\end{table}
+
+\begin{table}[h!]
+	\caption{Detalhamento da tabela \texttt{TB\_PARCEIRO}.}
+	\label{dictparc}
+	\begin{footnotesize}
+	\begin{tabular}{|p{40mm}|p{40mm}|p{45mm}|}
+	\hline
+	\hspace*{\fill}\textbf{Nome Variável}\hspace*{\fill} &
+	\hspace*{\fill}\textbf{Tipagem}\hspace*{\fill} &
+	\hspace*{\fill}\textbf{Tipo Chave}\hspace*{\fill} \\
+	\hline
+	\texttt{ID\_PARCEIRO} & \texttt{INT} & Primária \\ \hline
+	\texttt{NM\_PRIMEIRO} & \texttt{VARCHAR(30)} & - \\ \hline
+	\texttt{NM\_MEIO} & \texttt{VARCHAR(30)} & - \\ \hline
+	\texttt{NM\_ULTIMO} & \texttt{VARCHAR(30)} & - \\ \hline
+	\texttt{CD\_CPF\_REPRESENTANTE} & \texttt{VARCHAR(11)} & Única \\ \hline
+	\texttt{NM\_EMPRESA} & \texttt{VARCHAR(150)} & - \\ \hline
+	\texttt{TP\_CATEGORIA} & \texttt{CHAR(1)} & - \\ \hline
+	\texttt{ID\_ATIVIDADE} & \texttt{INT} & Estrangeira \\ \hline
+	\end{tabular}
+	\end{footnotesize}
+\end{table}
