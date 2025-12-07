@@ -1,6 +1,6 @@
 # Banco de Dados para Proposta de Sistema de Informação para Extensão Universitária
 
-Este repositório contém os scripts SQL para a criação, povoamentom, querrying e teste de performance de um banco de dados para gerenciamento de atividades de extensão. Este projeto foi desenvolvido como parte da avaliação da matéria MATA60 - Banco de Dados na Universidade Federal da Bahia.
+Este repositório contém os scripts SQL para a criação, povoamento, querrying, indexação e teste de performance de um banco de dados para gerenciamento de atividades de extensão. Este projeto foi desenvolvido como parte da avaliação da matéria MATA60 - Banco de Dados na Universidade Federal da Bahia.
 
 O objetivo principal deste projeto é construir o banco, povoá-lo, realizar consultas e comparar o desempenho destas sob diferentes estratégias de indexação.
 
