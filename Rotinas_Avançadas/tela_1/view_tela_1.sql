@@ -1,0 +1,24 @@
+CREATE MATERIALIZED VIEW mv_performance_areas AS
+SELECT 
+  a.NM_AREA_ESTUDO,
+  COUNT(DISTINCT a.ID_ATIVIDADE) as total_atividades,
+
+  ROUND(
+    COUNT(rl.ID_PARTICIPANTE)::NUMERIC / NULLIF(COUNT(DISTINCT a.ID_ATIVIDADE), 0), 
+  1) as media_alunos_por_turma,
+    
+  ROUND(
+    (COUNT(CASE WHEN rl.IS_CERTIFICADO = 'S' THEN 1 END)::NUMERIC / 
+    NULLIF(COUNT(rl.ID_PARTICIPANTE), 0)) * 100, 
+  1) as taxa_conclusao_percentual,
+    
+  MAX(a.DT_ATIVIDADE) as data_ultima_realizacao,
+  (CURRENT_DATE - MAX(a.DT_ATIVIDADE)) as dias_ocioso
+
+FROM TB_ATIVIDADE a
+LEFT JOIN RL_PARTICIPA rl ON a.ID_ATIVIDADE = rl.ID_ATIVIDADE
+GROUP BY a.NM_AREA_ESTUDO
+ORDER BY dias_ocioso DESC;
+
+-- Índice para garantir que a leitura dessa view seja instantânea
+CREATE INDEX idx_mv_perf_area ON mv_performance_areas(NM_AREA_ESTUDO);
