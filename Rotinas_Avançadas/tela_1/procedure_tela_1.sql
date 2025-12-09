@@ -10,11 +10,11 @@ CREATE OR REPLACE PROCEDURE sp_cadastrar_atividade_parceria(
   p_carga_horaria INT,
   p_ds_atividade VARCHAR,
   -- Parâmetros do Parceiro
-  p_id_parceiro INT,
-  p_nm_primeiro VARCHAR,
-  p_nm_ultimo VARCHAR,
-  p_nm_empresa VARCHAR,
-  p_tp_categoria CHAR
+  p_id_parceiro INT DEFAULT NULL,
+  p_nm_primeiro VARCHAR DEFAULT NULL,
+  p_nm_ultimo VARCHAR DEFAULT NULL,
+  p_nm_empresa VARCHAR DEFAULT NULL,
+  p_tp_categoria CHAR DEFAULT NULL
 )
 LANGUAGE plpgsql
 AS $$
@@ -32,19 +32,17 @@ BEGIN
     p_id_atividade, p_dt_atividade, p_hr_atividade, p_ds_local, p_tp_atividade, p_nm_area_estudo, p_nm_atividade, p_carga_horaria, p_ds_atividade
   );
 
-  INSERT INTO TB_PARCEIRO (
-    ID_PARCEIRO, NM_PRIMEIRO, NM_ULTIMO, NM_EMPRESA, TP_CATEGORIA, ID_ATIVIDADE
-  ) VALUES (
-    p_id_parceiro, p_nm_primeiro, p_nm_ultimo, p_nm_empresa, p_tp_categoria, p_id_atividade
-  );
+  UPDATE TB_ATIVIDADE SET NM_ATIVIDADE = UPPER(NM_ATIVIDADE) WHERE ID_ATIVIDADE = p_id_atividade;
 
-  UPDATE TB_ATIVIDADE
-  SET NM_ATIVIDADE = UPPER(NM_ATIVIDADE)
-  WHERE ID_ATIVIDADE = p_id_atividade;
+  IF p_id_parceiro IS NOT NULL THEN
+    INSERT INTO TB_PARCEIRO (
+      ID_PARCEIRO, NM_PRIMEIRO, NM_ULTIMO, NM_EMPRESA, TP_CATEGORIA, ID_ATIVIDADE
+    ) VALUES (
+      p_id_parceiro, p_nm_primeiro, p_nm_ultimo, p_nm_empresa, p_tp_categoria, p_id_atividade
+    );
 
-  UPDATE TB_PARCEIRO
-  SET NM_EMPRESA = UPPER(NM_EMPRESA)
-  WHERE ID_PARCEIRO = p_id_parceiro;
+    UPDATE TB_PARCEIRO SET NM_EMPRESA = UPPER(NM_EMPRESA) WHERE ID_PARCEIRO = p_id_parceiro;
+  END IF;
 
   RAISE NOTICE "Cadastro realizado com sucesso.";
 END;
