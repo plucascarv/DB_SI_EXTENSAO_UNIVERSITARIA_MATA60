@@ -1,4 +1,3 @@
-
 -- Limpeza para reexecução
 DROP MATERIALIZED VIEW IF EXISTS mv_dashboard2_participacao_anual;
 DROP MATERIALIZED VIEW IF EXISTS mv_dashboard2_certificacao_anual;
@@ -46,31 +45,33 @@ JOIN rl_participa r ON r.id_atividade = a.id_atividade
 GROUP BY date_trunc('year', a.dt_atividade), a.nm_area_estudo
 ORDER BY ano, total_participacoes DESC;
 
--- Impacto institucional
+-- Impacto institucional (CORRIGIDA)
+-- Removido o JOIN com tb_instituicao inexistente e ajustado para usar NM_INSTITUICAO
 CREATE MATERIALIZED VIEW mv_dashboard2_impacto_institucional AS
 SELECT
-    i.nm_instituicao,
+    p.nm_instituicao,
     COUNT(r.id_participante) AS total_participacoes,
     COUNT(*) FILTER (WHERE r.is_certificado = 'S') AS total_certificados,
     ROUND(
         (COUNT(*) FILTER (WHERE r.is_certificado = 'S')::decimal /
          NULLIF(COUNT(r.id_participante), 0)) * 100, 2
     ) AS taxa_certificacao_percent
-FROM tb_instituicao i
-JOIN tb_participante p ON p.id_instituicao = i.id_instituicao
+FROM tb_participante p
 JOIN rl_participa r ON r.id_participante = p.id_participante
-GROUP BY i.nm_instituicao
+WHERE p.nm_instituicao IS NOT NULL -- Filtra nulos para não sujar o gráfico
+GROUP BY p.nm_instituicao
 ORDER BY total_participacoes DESC;
 
--- Distribuição por tipo de atividade
+-- Distribuição por tipo de atividade (CORRIGIDA)
+-- Ajustado nome da coluna para TP_ATIVIDADE
 CREATE MATERIALIZED VIEW mv_dashboard2_tipo_atividade AS
 SELECT
     date_trunc('year', a.dt_atividade) AS ano,
-    a.tipo_atividade,
+    a.tp_atividade, -- Corrigido de tipo_atividade para tp_atividade
     COUNT(r.id_participante) AS total_participacoes
 FROM tb_atividade a
 JOIN rl_participa r ON r.id_atividade = a.id_atividade
-GROUP BY date_trunc('year', a.dt_atividade), a.tipo_atividade
+GROUP BY date_trunc('year', a.dt_atividade), a.tp_atividade
 ORDER BY ano, total_participacoes DESC;
 
 -- Média histórica de participação por atividade
