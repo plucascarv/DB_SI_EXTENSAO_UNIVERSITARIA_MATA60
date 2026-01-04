@@ -1,0 +1,14 @@
+\begin{lstlisting}[caption={Procedures de refresh para Dashboard 2}, label={lst:code}]
+CREATE OR REPLACE PROCEDURE sp_refresh_dashboard2()
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  REFRESH MATERIALIZED VIEW mv_dashboard2_participacao_anual;
+  REFRESH MATERIALIZED VIEW mv_dashboard2_certificacao_anual;
+  REFRESH MATERIALIZED VIEW mv_dashboard2_area_estudo_historico;
+  REFRESH MATERIALIZED VIEW mv_dashboard2_impacto_institucional;
+  REFRESH MATERIALIZED VIEW mv_dashboard2_tipo_atividade;
+  REFRESH MATERIALIZED VIEW mv_dashboard2_media_participacao;
+END;
+$$;
+\end{lstlisting}

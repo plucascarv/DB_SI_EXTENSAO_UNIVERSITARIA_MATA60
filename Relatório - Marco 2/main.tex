@@ -1,0 +1,220 @@
+\documentclass{SBCbookchapter}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[brazil,english]{babel}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+% Estilo Preto e Branco
+\lstdefinestyle{bw_style}{
+    backgroundcolor=\color{white},   
+    commentstyle=\itshape\color{gray},
+    keywordstyle=\bfseries\color{black},
+    numberstyle=\tiny\color{black},
+    stringstyle=\color{black},
+    basicstyle=\ttfamily\footnotesize\color{black},
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    frame=single, % Adiciona uma borda ao redor do código
+    language=SQL
+}
+\lstset{style=bw_style}
+
+\author{Alessandro O. do Nascimento, Daniel A. Melo, Pedro Lucas P. A. Carvalho e Péricles A. Tavares}
+\title{Proposta de Sistema de Informação para Atividades de Extensão Universitária: Rotinas Avançadas}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This report presents the process of creating and deploying advaced querying routines for the previously proposed university extension activities management information system. Futhermore, it focuses on presenting each of the artifacts, their routines, the creation process, and the justification for their implementation, in addition to providing guidelines to reproduce the experiment.
+\end{abstract}
+
+\begin{resumo}
+\begin{otherlanguage}{brazil}
+O presente relatório apresenta o processo de criação e implantação de rotinas avançadas de querying para o sistema de informação para gerenciamento de atividades de extensão universitária proposto anteriormente. Ademais, foca-se em apresentar cada um dos artefatos, sua rotinas e processo de criação e a justificativa de sua presença; além de deixar disponíveis elementos de guia para que se reproduza o experimento.
+\end{otherlanguage}
+\end{resumo}
+
+\section{Introdução}
+Compreendeu-se anteriormente os aspectos de modelagem, construção, povoamento e querying do banco de dados para um sistema de informações para gestão de atividades de extensão universitária, parte-se agora um momento de expansão dos elementos técnicos da implantação do banco e sistema. Este trabalho então foca na evolução da camada de dados para atender a requisitos não funcionais críticos - e.g. suporte a tarefas analíticas, privacidade e preservação da integridade de dados -, um momento de construção de rotinas avançadas.
+
+Nesta etapa, o banco de dados deixa de ser apenas um repositório passivo de informações para assumir um papel ativo na regra de negócio e na inteligência do sistema. Para isso, foram utilizados recursos avançados da linguagem SQL e do SGBD PostgreSQL \cite{elmasri_sistemas_2019}, especificamente:
+
+\begin{enumerate}
+    \item Stored Procedures: Para encapsular a lógica de inserção e atualização, garantindo que a aplicação não tenha acesso direto às tabelas base e que todas as regras de validação sejam cumpridas .
+    \item Materialized Views: Para pré-processar consultas complexas e agregações pesadas, oferecendo dados instantâneos para tomadas de decisão sem comprometer o desempenho operacional do banco.
+    \item Transações: Para assegurar a atomicidade de operações que envolvem múltiplas tabelas, garantindo que o banco nunca permaneça em um estado inconsistente.
+\end{enumerate}
+
+O documento está estruturado em torno da especificação do back-end para quatro artefatos de software propostos: (1) uma tela de cadastro com validação, (2) uma tela de operação complexa envolvendo histórico, (3) um dashboard estratégico para a diretoria e (4) um dashboard operacional para a gerência. Para cada artefato, são apresentados os scripts SQL desenvolvidos e a justificativa técnica de sua implementação.
+
+\section{Artefatos}
+\subsection{Tela 1: Cadastro com Validação}
+\input{artefatos/tela_1/presentation}
+
+\subsection{Tela 2: Validação e Auditoria de Participação}
+\input{artefatos/tela_2/presentation}
+
+\subsection{Dashboard 1: Estratégico (Diretoria)}
+\input{artefatos/dash_1/presentation}
+
+\subsection{Dashboard 2: Operacional (Gestão Tática)}
+\input{artefatos/dash_2/presentation}
+
+\section{Rotinas}
+\subsection{Tela de Cadastro}
+A implementação técnica da Tela 1 foi dividida em dois scripts complementares: um para a definição da estrutura analítica de leitura e outro para a lógica procedural de escrita.
+
+\subsubsection{Camada Analítica}
+\input{artefatos/tela_1/view}
+O script (Listing 1.1) desta etapa apresenta a definição da visão materializada mv\_perfor- mance\_areas, desenvolvida para sustentar o painel de indicadores da tela. A consulta SQL foi construída para agrupar estatísticas por área de estudo, calculando métricas complexas como a média de alunos por turma e a taxa percentual de conclusão; o script é concluído com a criação de um índice B-Tree, otimizando o tempo de resposta das consultas de filtragem \cite{elmasri_sistemas_2019}.
+
+\subsubsection{Camada Transacional}
+\input{artefatos/tela_1/procedure}
+Agora, foca-se na implementação da rotina sp\_cadastrar\_atividade\_parceria, como em Listing 1.2, responsável por encapsular as regras de negócio de inserção de dados. A estrutura lógica da procedure inicia-se com uma validação de integridade, impedindo a duplicação de identificadores primários. Adicionalmente, o código impõe a padronização dos dados ao executar atualizações automáticas de sanitização textual, convertendo os nomes principais para caixa alta imediatamente após a persistência.
+
+\subsection{Tela de Validação e Auditoria}
+A implementação deste artefato exigiu uma abordagem mais complexa do que a tela de cadastro, envolvendo a evolução da estrutura do banco de dados, consultas analíticas com janelamento e controle transacional explícito para garantir a integridade da auditoria.
+
+\subsubsection{Evolução do Esquema}
+\input{artefatos/tela_2/ddl}
+
+Antes da implementação da lógica de negócio, foi necessário realizar ajustes estruturais no esquema do banco de dados para suportar os requisitos de auditoria. O script executa a criação da tabela tb\_log\_validacao, destinada a armazenar o histórico de operações, e altera a tabela de participantes (tb\_participante) adicionando uma coluna de carimbo de tempo. Estas estruturas são pré-requisitos obrigatórios para a execução segura da Stored Procedure subsequente.
+
+\subsubsection{Vizualização e Decisão}
+\input{artefatos/tela_2/view}
+
+Para dar suporte à interface de validação, foi criada a visão materializada mv\_pen- dencias \_validacao. O script implementa uma consulta avançada que integra dados de três tabelas distintas para listar apenas as inscrições pendentes de certificação. O destaque técnico desta rotina é a utilização de uma função de janela para calcular o total de atividades do aluno no mesmo contexto da linha retornada. Isso permite que o validador analise o histórico de engajamento do participante sem a necessidade de subconsultas adicionais, otimizando a performance de leitura.
+
+\subsubsection{Transacional e Auditoria}
+\input{artefatos/tela_2/procedure}
+
+A lógica de aprovação foi encapsulada na procedure sp\_validar\_e\_registrar, projetada para operar sob um controle transacional rigoroso. O código define um bloco atômico onde três operações de escrita ocorrem sequencialmente: a inserção do log de auditoria, a atualização do status do certificado e a atualização do rastro do participante. O uso do comando COMMIT ao final assegura a atomicidade do processo, garantindo que o certificado só seja validado se o log for gravado com sucesso, preservando a integridade e a rastreabilidade dos dados.
+
+\subsubsection{Manutenção e Rejeição}
+\input{artefatos/tela_2/transaction}
+
+Para complementar o ciclo de vida da validação, foi elaborado um script de manu- tenção para tratar casos de rejeição ou cancelamento. O comando DELETE foi construído com cláusulas de segurança que restringem a exclusão apenas a registros que ainda não foram certificados (is\_certificado = 'N'). Isso impede a remoção acidental de histórico acadêmico consolidado, permitindo ao gestor limpar da base apenas as inscrições inválidas ou duplicadas.
+
+\subsection{Dashboard Estratégico}
+As rotinas descritas a seguir foram desenvolvidas para suportar o Dashboard Estratégico (Dashboard 1), sendo responsáveis pela consolidação e atualização dos indicadores analíticos apresentados à diretoria.
+
+Diferentemente das rotinas transacionais \cite{elmasri_sistemas_2019}, estas rotinas operam exclusivamente em modo analítico, explorando recursos avançados do PostgreSQL, como funções de agregação, filtros condicionais, operações temporais e visões materializadas.
+
+\subsubsection{Visão Materializada: Desempenho Mensal das Atividades}
+Esta visão materializada consolida, em base mensal, o total de participações em atividades de extensão, o número de certificados emitidos e a taxa percentual de certificação. A agregação temporal é realizada por meio da função \texttt{data\_trunc}, permitindo análises estratégicas de evolução histórica.
+
+\begin{lstlisting}[caption={Construção da materialized view com foco em desempenho mensal}, label={lst:code}]
+CREATE MATERIALIZED VIEW mv_dashboard1_desempenho_mensal AS
+SELECT
+    date_trunc('month', a.dt_atividade) AS mes,
+    COUNT(r.id_participante) AS total_participacoes,
+    COUNT(*) FILTER (WHERE r.is_certificado = 'S') AS total_certificados,
+    ROUND(
+        (COUNT(*) FILTER (WHERE r.is_certificado = 'S')::decimal /
+         NULLIF(COUNT(r.id_participante), 0)) * 100, 2
+    ) AS taxa_certificacao_percent
+FROM tb_atividade a
+JOIN rl_participa r ON r.id_atividade = a.id_atividade
+GROUP BY date_trunc('month', a.dt_atividade)
+ORDER BY mes;
+\end{lstlisting}
+
+\subsubsection{Visão Materializada: Participação por Área de Estudo e Gênero}
+Esta visão materializada agrupa os participantes por área de estudo, segmentando-os por gênero. O objetivo é subsidiar análises institucionais relacionadas à diversidade, inclusão e distribuição das atividades entre as diferentes áreas do conhecimento.
+
+\begin{lstlisting}[caption={Construção da materialized view com foco em gênero e área de estudo}, label={lst:code}]
+CREATE MATERIALIZED VIEW mv_participacao_genero_area AS
+SELECT
+    a.nm_area_estudo AS area_estudo,
+    SUM(CASE WHEN p.tp_genero = 'F' THEN 1 ELSE 0 END) AS total_feminino,
+    SUM(CASE WHEN p.tp_genero = 'M' THEN 1 ELSE 0 END) AS total_masculino,
+    SUM(CASE WHEN p.tp_genero = 'O' THEN 1 ELSE 0 END) AS total_outros
+FROM tb_participante p
+JOIN rl_participa r ON r.id_participante = p.id_participante
+JOIN tb_atividade a ON a.id_atividade = r.id_atividade
+GROUP BY a.nm_area_estudo
+ORDER BY a.nm_area_estudo;
+\end{lstlisting}
+
+\subsubsection{Visão Materializada: Impacto das Parcerias Institucionais}
+Esta visão materializada avalia o impacto das parcerias institucionais a partir da categoria do parceiro, considerando o número total de parceiros envolvidos, as atividades apoiadas e o total de participantes impactados. O uso de agregações distintas garante a precisão dos indicadores apresentados.
+
+\begin{lstlisting}[caption={Construção da materialized view com foco em análise de parcerias}, label={lst:code}]
+CREATE MATERIALIZED VIEW mv_dashboard1_impacto_parceiros AS
+SELECT
+    pa.tp_categoria,
+    COUNT(DISTINCT pa.id_parceiro) AS total_parceiros,
+    COUNT(DISTINCT pa.id_atividade) AS atividades_apoiadas,
+    COUNT(r.id_participante) AS participantes_afetados
+FROM tb_parceiro pa
+JOIN tb_atividade a ON a.id_atividade = pa.id_atividade
+LEFT JOIN rl_participa r ON r.id_atividade = a.id_atividade
+GROUP BY pa.tp_categoria
+ORDER BY atividades_apoiadas DESC;
+\end{lstlisting}
+
+\subsubsection{Visão Materializada: Evolução da Carga Horária e Participação}
+Esta visão materializada apresenta a evolução mensal da carga horária consumida pelas atividades de extensão, bem como a média de carga horária por atividade e o total de presenças registradas. Esses indicadores permitem avaliar a eficiência do uso dos recursos acadêmicos ao longo do tempo.
+
+\begin{lstlisting}[caption={Construção da materialized view com foco em análise de carga horária}, label={lst:code}]
+CREATE MATERIALIZED VIEW mv_dashboard1_carga_horaria_historica AS
+SELECT
+    date_trunc('month', a.dt_atividade) AS mes,
+    SUM(a.carga_horaria) AS carga_total_consumida,
+    AVG(a.carga_horaria) AS media_carga_por_atividade,
+    COUNT(r.id_participante) AS total_presencas
+FROM tb_atividade a
+JOIN rl_participa r ON r.id_atividade = a.id_atividade
+GROUP BY date_trunc('month', a.dt_atividade)
+ORDER BY mes;
+\end{lstlisting}
+
+\subsection{Stored Procedures de Atualização das Visões Materializadas}
+A utilização de visões materializadas é uma estratégia fundamental para otimizar a performance de consultas complexas em grandes volumes de dados. Diferente das visões comuns, que executam sua consulta interna a cada acesso, as visões materializadas armazenam o resultado em disco, exigindo um mecanismo de sincronização para evitar a obsolescência dos dados \cite{elmasri_sistemas_2019}.
+
+As Stored Procedures de atualização são acionadas de forma explícita pela camada de aplicação ou pelo administrador do sistema, em momentos previamente definidos, como ao final de um ciclo de importação de dados ou antes da geração de relatórios gerenciais, garantindo que os indicadores analíticos reflitam um estado consistente do banco de dados. Essas rotinas podem ser executadas manualmente ou integradas a mecanismos externos de agendamento, não sendo acionadas automaticamente a cada operação transacional, de modo a preservar o desempenho do sistema.
+
+\subsubsection{Atualização das Visões Materializadas do Dashboard Estratégico}
+As \textit{Stored Procedures} a seguir foram desenvolvidas para realizar a atualização controlada das visões materializadas associadas ao Dashboard Estratégico. Essa abordagem evita o recálculo contínuo das agregações e assegura que os dados analíticos sejam atualizados de forma explícita e consistente.
+
+\vspace{1cm}
+\input{artefatos/dash_1/procedures_list}
+
+\subsection{Dashboard Operacional}
+A codificação deste artefato foi estruturada para suportar seis dimensões analíticas distintas, todas materializadas para garantir a performance de acesso histórico. O código foi organizado em blocos de visualização temporal, análise de segmentação e uma rotina unificada de manutenção.
+
+\subsubsection{Análise Temporal e Eficiência}
+O primeiro bloco do script define as visões materializadas focadas na evolução longitudinal do programa. A view mv\_dashboard2\_participacao\_anual utiliza a função de truncagem de data para agrupar o volume de inscrições por ano, permitindo a comparação direta entre o total de participações e a quantidade de indivíduos únicos atendidos. Complementarmente, a view mv\_dashboard2\_certificacao\_anual aplica filtros condicionais (FILTER WHERE) para calcular a taxa de sucesso das atividades, gerando um indicador percentual de certificação que serve como métrica de qualidade pedagógica ao longo do tempo.
+
+\input{artefatos/dash_2/views_1-2}
+
+\subsubsection{Segmentação e Perfil Institucional}
+O segundo conjunto de views dedica-se a detalhar o perfil da oferta e da procura. As visões mv\_dashboard2\_area\_estudo\_historico e mv\_dashboard2\_tipo\_atividade realizam o cruzamento de dados temporais com categorias taxonômicas, permitindo aos gestores identificar quais as áreas do conhecimento e formatos de eventos - e.g. workshops, palestras - que apresentam tendência de crescimento. Simultaneamente, a view mv\_dash- board2\_impacto\_institucional agrega os participantes pela sua instituição de origem, proporcionando um mapa da penetração do programa no ecossistema acadêmico externo. Por fim, a view mv\_dashboard2\_media\_participacao estabelece um ranking de popularidade, calculando a média histórica de público por evento para balizar metas futuras.
+
+\input{artefatos/dash_2/views_3-6}
+
+\subsubsection{Orquestração de atualização}
+\input{artefatos/dash_2/procedures_refresh}
+
+Para garantir a consistência temporal de todos os indicadores sem onerar o administrador com múltiplas execuções manuais, foi implementada a procedure sp\_refresh\_dash- board2. Esta rotina atua como um orquestrador de manutenção, encapsulando os comandos de REFRESH de todas as seis visões materializadas numa única chamada. Esta abordagem centralizada facilita o agendamento de tarefas automáticas pelo sistema operativo ou pelo agendador do banco de dados, assegurando que o painel operacional reflita sempre a última versão consolidada dos dados analíticos.
+
+
+\section{Anexo}
+Para reproduzir o projeto é fundamental que o interessado utilize ferramentas semelhantes às que os autores utilizaram, um SGBD de PostgreSQL (PGAdmin, por exemplo). Ademais, todos os códigos mencionado durante as seções anteriores e necessários para construção do banco de dados estão disponíveis e organizados em um repositório GitHub, disponível em \href{https://github.com/plucascarv/DB_SI_EXTENSAO_UNIVERSITARIA_MATA60/tree/main}{DB\_SI\_EXTENSAO\_UNIVERSITARIA\_MATA60}. É de se notar que, para esta etapa do projeto, deve-se levar em contar especialmente o conteúdo da "Rotinas\_Avançadas" dentre as pastas disponíveis através do link. Ademais, no repositório também estão disponíveis arquivos README com instruções diretas de como reproduzir o banco, os experimentos e rotinas avançadas no SGBD, bem como o código LaTeX deste relatório.
+
+\bibliographystyle{sbc}
+\bibliography{refs}
+
+\end{document}

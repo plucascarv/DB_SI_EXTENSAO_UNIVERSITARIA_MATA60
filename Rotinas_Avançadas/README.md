@@ -75,13 +75,27 @@ SELECT * FROM tb_log_validacao;
 
 ```
 
-### 3. Atualização de Dashboards
+### 3. Teste do Dashboard Estratégico (Dashboard 1)
 
 ```sql
--- Atualizar Dashboard Operacional
+-- Executa a rotina de atualização (Refresh) dos indicadores mensais
+CALL sp_refresh_desempenho_mensal();
+
+-- Consulta a visão materializada para ver os KPIs (Taxa de Certificação, etc.)
+SELECT * FROM mv_dashboard1_desempenho_mensal;
+
+-- Consulta o impacto das parcerias (Categorias vs. Participantes Afetados)
+SELECT * FROM mv_dashboard1_impacto_parceiros;
+
+```
+
+### 4. Teste do Dashboard Operacional (Dashboard 2)
+
+```sql
+-- Executa a rotina orquestradora que atualiza TODAS as views operacionais
 CALL sp_refresh_dashboard2();
 
--- Verificar dados atualizados
+-- Consulta a evolução anual de participações
 SELECT * FROM mv_dashboard2_participacao_anual;
 
 ```

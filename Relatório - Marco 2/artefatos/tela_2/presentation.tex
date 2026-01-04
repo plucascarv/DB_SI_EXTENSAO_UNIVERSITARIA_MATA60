@@ -1,0 +1,14 @@
+Este artefato suporta o processo crítico de validação de presenças e emissão de certificados. Diferentemente da tela de cadastro simples, esta interface realiza uma operação complexa que exige rigorosa integridade de dados e rastreabilidade. O objetivo é permitir que o administrador visualize pendências e aprove ou rejeite participações, gerando automaticamente um histórico de auditoria. 
+
+Para atender a estes requisitos, foi necessário realizar uma evolução no esquema do banco de dados. Identificou-se que o modelo original carecia de estruturas para auditoria. Portanto, criou-se a tabela tb\_log\_validacao e adicionou-se a coluna dt\_ultima\_atuali- zacao na tabela de participantes. Estas alterações estruturais foram pré-requisitos para a implementação da lógica transacional subsequente.
+O back-end deste artefato foi construído sobre três pilares:
+\begin{enumerate}
+    \item Visualização de Pendências (Materialized View): Para a listagem dos alunos aguar- dando aprovação, implementou-se a visão materializada mv\_pendencias\_validacao. Esta view utiliza funções de janela para calcular o histórico do aluno no mesmo contexto da listagem. Isso permite ao validador ter uma visão holística do engajamento do aluno antes de aprovar uma nova atividade, sem a necessidade de executar múltiplas subconsultas pesadas \cite{silberschatz_database_2019}.
+    \item Processamento Transacional (Stored Procedure com COMMIT): A aprovação da participação foi encapsulada na procedure sp\_validar\_e\_registrar. O diferencial desta rotina é o uso explícito de controle de transação (BEGIN ... COMMIT). A procedure executa três operações de escrita interdependentes:
+    \begin{itemize}
+        \item Auditoria (INSERT): Registra o evento na tabela de log criada.
+        \item Validação (UPDATE): Altera o status do certificado para 'S' e insere o feedback.
+        \item Rastreio (UPDATE): Atualiza o carimbo de tempo do participante. O uso da transação garante a atomicidade: ou as três operações ocorrem com sucesso, ou nenhuma delas é efetivada, impedindo, por exemplo, que um certificado seja validado sem o respectivo registro de log.
+    \end{itemize} 
+    \item Manutenção e Limpeza (DELETE): Para casos onde a validação é rejeitada ou a inscrição é considerada inválida, implementou-se uma rotina de remoção segura (DELETE) na tabela de relacionamento, garantindo que apenas registros não certificados (is\_certificado = 'N') possam ser excluídos, preservando o histórico oficial.
+\end{enumerate}

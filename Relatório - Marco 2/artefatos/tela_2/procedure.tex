@@ -1,0 +1,26 @@
+\begin{lstlisting}[caption={Procedure de verificação e registro de completude de atividades}, label={lst:code}]
+CREATE OR REPLACE PROCEDURE sp_validar_e_registrar(
+    p_id_participante INT,
+    p_id_atividade INT,
+    p_feedback TEXT
+)
+LANGUAGE plpgsql
+AS $$
+BEGIN
+    INSERT INTO tb_log_validacao (id_participante, id_atividade, dt_validacao)
+    VALUES (p_id_participante, p_id_atividade, CURRENT_TIMESTAMP);
+
+    UPDATE rl_participa 
+    SET is_certificado = 'S', 
+        ds_feedback = p_feedback
+    WHERE id_participante = p_id_participante 
+      AND id_atividade = p_id_atividade;
+
+    UPDATE tb_participante 
+    SET dt_ultima_atualizacao = CURRENT_TIMESTAMP
+    WHERE id_participante = p_id_participante;
+
+    COMMIT;
+END;
+$$;
+\end{lstlisting}

@@ -1,0 +1,27 @@
+\begin{lstlisting}[caption={View de evolução anual da participação}, label={lst:code}]
+CREATE MATERIALIZED VIEW mv_dashboard2_participacao_anual AS
+SELECT
+    date_trunc('year', a.dt_atividade) AS ano,
+    COUNT(r.id_participante) AS total_participacoes,
+    COUNT(DISTINCT r.id_participante) AS participantes_unicos
+FROM tb_atividade a
+JOIN rl_participa r ON r.id_atividade = a.id_atividade
+GROUP BY date_trunc('year', a.dt_atividade)
+ORDER BY ano;
+\end{lstlisting}
+
+\begin{lstlisting}[caption={View de taxa anual de certificação}, label={lst:code}]
+CREATE MATERIALIZED VIEW mv_dashboard2_certificacao_anual AS
+SELECT
+    date_trunc('year', a.dt_atividade) AS ano,
+    COUNT(r.id_participante) AS total_participacoes,
+    COUNT(*) FILTER (WHERE r.is_certificado = 'S') AS total_certificados,
+    ROUND(
+        (COUNT(*) FILTER (WHERE r.is_certificado = 'S')::decimal /
+         NULLIF(COUNT(r.id_participante), 0)) * 100, 2
+    ) AS taxa_certificacao_percent
+FROM tb_atividade a
+JOIN rl_participa r ON r.id_atividade = a.id_atividade
+GROUP BY date_trunc('year', a.dt_atividade)
+ORDER BY ano;
+\end{lstlisting}

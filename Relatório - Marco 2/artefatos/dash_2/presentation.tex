@@ -1,0 +1,26 @@
+Este artefato compreende o back-end de dados destinado ao suporte da gestão intermédia e coordenação pedagógica. Enquanto o dashboard estratégico foca em indicadores macroscópicos, este painel operacional necessita de uma granularidade superior para permitir o monitoramento tático das atividades de extensão. O objetivo é fornecer aos gestores uma visão longitudinal sobre a evolução do programa, a diversidade da oferta académica e o perfil institucional dos participantes.
+
+Para garantir a fluidez na navegação e a responsividade dos seis componentes gráficos exigidos, a arquitetura manteve o padrão de utilização de Materialized Views. Esta decisão técnica justifica-se pela necessidade de realizar segregações históricas (agrupamentos por ano e tipo) sobre a totalidade da base de dados. A execução destas consultas analíticas em tempo real sobre tabelas transacionais normalizadas acarretaria latência perceptível e bloqueios de leitura, prejudicando a operação de cadastro.
+O conjunto de dados foi estruturado em seis visões materializadas que alimentam as seguintes dimensões de análise:
+\begin{enumerate}
+    \item Evolução e Qualidade (Séries Temporais):
+    \begin{itemize}
+        \item Uma visão dedicada à Evolução Anual da Participação, que confronta o número total de inscrições com o número de participantes únicos, permitindo medir a fidelização e a recorrência dos alunos ao longo dos anos.
+        \item Uma visão de Taxa de Certificação, que monitoriza a eficácia pedagógica ano a ano, calculando o percentual de concluintes face aos inscritos. Este indicador é crucial para identificar quedas bruscas de rendimento ou evasão em períodos específicos.
+    \end{itemize}
+    
+    \item Segmentação da Oferta:
+    \begin{itemize}
+        \item Uma matriz analítica de Histórico por Área de Estudo, que permite aos coordenadores visualizar quais as disciplinas (ex: Tecnologia, Saúde, Humanas) que apresentam tendências de crescimento ou declínio na procura.
+        \item Uma análise de Distribuição por Tipo de Atividade, que segrega os dados por tipologia (Workshops, Palestras, Cursos), auxiliando no planeamento do \textit{mix} de produtos educacionais a ser ofertado no próximo ciclo.
+    \end{itemize}
+    
+    \item Perfil e Benchmarking:
+    \begin{itemize}
+        \item Uma visão de Impacto Institucional, que mapeia a origem dos participantes agrupando-os pela instituição declarada. Este componente permite entender a penetração do programa noutras instituições de ensino e a diversidade do público atendido.
+        \item Um relatório de Média Histórica por Atividade, que funciona como um ranking de popularidade, calculando a média de público de cada evento específico. Isso permite comparar o desempenho de uma edição atual contra a sua própria média histórica.
+    \end{itemize}
+\end{enumerate}
+
+Para a manutenção destes dados, foi implementada uma Stored Procedure de Orquestração (sp\_refresh\_dashboard2). Diferente das atualizações individuais, esta rotina unificada executa o refresh sequencial de todas as seis visões materializadas numa única transação lógica, simplificando o agendamento de tarefas de manutenção pelo administrador da base de dados.
+A implementação deste artefato cumpre rigorosamente os requisitos de preservação e performance. Ao pré-calcular estatísticas anuais e médias históricas, o sistema evita o recálculo redundante de dados passados que raramente sofrem alteração. Adicionalmente, a privacidade é assegurada, pois os gestores operacionais acedem apenas a dados estatísticos consolidados por instituição ou ano, sem exposição direta aos registos individuais dos alunos nas tabelas transacionais.

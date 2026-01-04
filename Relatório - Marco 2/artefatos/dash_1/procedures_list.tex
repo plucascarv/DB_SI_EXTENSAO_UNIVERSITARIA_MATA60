@@ -1,0 +1,39 @@
+\begin{lstlisting}[caption={Procedure de atualização do desempenho mensal}, label={lst:code}]
+CREATE OR REPLACE PROCEDURE sp_refresh_desempenho_mensal()
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  REFRESH MATERIALIZED VIEW mv_dashboard1_desempenho_mensal;
+END;
+$$;
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Procedure de atualização por área de estudo e gênero}, label={lst:code}]
+CREATE OR REPLACE PROCEDURE sp_refresh_participacao_genero_area()
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  REFRESH MATERIALIZED VIEW mv_participacao_genero_area;
+END;
+$$;
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Procedure de atualização do impacto de parcerias}, label={lst:code}]
+CREATE OR REPLACE PROCEDURE sp_refresh_impacto_parceiros()
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  REFRESH MATERIALIZED VIEW mv_dashboard1_impacto_parceiros;
+END;
+$$;
+\end{lstlisting}
+
+\begin{lstlisting}[caption={Procedure de atualização da evolução da carga horária e participação}, label={lst:code}]
+CREATE OR REPLACE PROCEDURE sp_refresh_carga_horaria_historica()
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  REFRESH MATERIALIZED VIEW mv_dashboard1_carga_horaria_historica;
+END;
+$$;
+\end{lstlisting}

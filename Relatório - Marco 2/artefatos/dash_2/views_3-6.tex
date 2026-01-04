@@ -1,0 +1,55 @@
+\begin{lstlisting}[caption={View de participação por área de estudo (histórico)}, label={lst:code}]
+CREATE MATERIALIZED VIEW mv_dashboard2_area_estudo_historico AS
+SELECT
+    date_trunc('year', a.dt_atividade) AS ano,
+    a.nm_area_estudo,
+    COUNT(r.id_participante) AS total_participacoes
+FROM tb_atividade a
+JOIN rl_participa r ON r.id_atividade = a.id_atividade
+GROUP BY date_trunc('year', a.dt_atividade), a.nm_area_estudo
+ORDER BY ano, total_participacoes DESC;
+\end{lstlisting}
+
+\begin{lstlisting}[caption={View de impacto institucional}, label={lst:code}]
+CREATE MATERIALIZED VIEW mv_dashboard2_impacto_institucional AS
+SELECT
+    p.nm_instituicao,
+    COUNT(r.id_participante) AS total_participacoes,
+    COUNT(*) FILTER (WHERE r.is_certificado = 'S') AS total_certificados,
+    ROUND(
+        (COUNT(*) FILTER (WHERE r.is_certificado = 'S')::decimal /
+         NULLIF(COUNT(r.id_participante), 0)) * 100, 2
+    ) AS taxa_certificacao_percent
+FROM tb_participante p
+JOIN rl_participa r ON r.id_participante = p.id_participante
+WHERE p.nm_instituicao IS NOT NULL -- Filtra nulos para não sujar o gráfico
+GROUP BY p.nm_instituicao
+ORDER BY total_participacoes DESC;
+\end{lstlisting}
+
+\begin{lstlisting}[caption={View de distribuição por tipo de atividade}, label={lst:code}]
+CREATE MATERIALIZED VIEW mv_dashboard2_tipo_atividade AS
+SELECT
+    date_trunc('year', a.dt_atividade) AS ano,
+    a.tp_atividade, -- Corrigido de tipo_atividade para tp_atividade
+    COUNT(r.id_participante) AS total_participacoes
+FROM tb_atividade a
+JOIN rl_participa r ON r.id_atividade = a.id_atividade
+GROUP BY date_trunc('year', a.dt_atividade), a.tp_atividade
+ORDER BY ano, total_participacoes DESC;
+\end{lstlisting}
+
+\begin{lstlisting}[caption={View de média histórica de participação por atividade}, label={lst:code}]
+CREATE MATERIALIZED VIEW mv_dashboard2_media_participacao AS
+SELECT
+    a.nm_atividade,
+    COUNT(r.id_participante) AS total_participacoes,
+    ROUND(
+        COUNT(r.id_participante)::decimal /
+        NULLIF(COUNT(DISTINCT a.id_atividade), 0), 2
+    ) AS media_participacao
+FROM tb_atividade a
+JOIN rl_participa r ON r.id_atividade = a.id_atividade
+GROUP BY a.nm_atividade
+ORDER BY media_participacao DESC;\textbf{}
+\end{lstlisting}

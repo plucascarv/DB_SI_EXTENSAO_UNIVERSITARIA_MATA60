@@ -1,0 +1,21 @@
+\begin{lstlisting}[caption={Materialized View para análise de pendências}, label={lst:code}]
+CREATE MATERIALIZED VIEW mv_pendencias_validacao AS
+SELECT 
+    p.nm_primeiro || ' ' || p.nm_ultimo AS participante,
+    a.nm_atividade,
+    a.tp_atividade,
+    COUNT(r.id_participacao) OVER(PARTITION BY p.id_participante) AS total_atividades_inscrito
+FROM tb_participante p
+JOIN rl_participa r ON p.id_participante = r.id_participante
+JOIN tb_atividade a ON r.id_atividade = a.id_atividade
+WHERE r.is_certificado = 'N'
+WITH DATA;
+
+SELECT * FROM mv_pendencias_validacao WHERE tp_atividade = 'Workshop';
+
+SELECT p.id_participante, a.id_atividade
+FROM tb_participante p
+JOIN rl_participa r ON p.id_participante = r.id_participante
+JOIN tb_atividade a ON r.id_atividade = a.id_atividade
+WHERE p.id_participante = 10 AND a.id_atividade = 5;
+\end{lstlisting}
