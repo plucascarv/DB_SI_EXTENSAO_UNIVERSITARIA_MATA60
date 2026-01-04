@@ -89,13 +89,3 @@ DROP INDEX IF EXISTS idx_parceiro_atividade_btree;
 DROP INDEX IF EXISTS idx_participante_tp_btree;
 DROP INDEX IF EXISTS idx_participa_certificado_btree;
 ```
-
-## Descrição dos Arquivos
-
-  * `DDL_table_creation.sql`: Define a estrutura de 4 tabelas (`TB_PARTICIPANTE`, `TB_ATIVIDADE`, `RL_PARTICIPA`, `TB_PARCEIRO`).
-  * `inserts_participantes.sql`: Script de povoamento da tabela `TB_PARTICIPANTE`.
-  * `inserts_atividades.sql`: Script de povoamento da tabela `TB_ATIVIDADE`.
-  * `inserts_parceiros.sql`: Script de povoamento da tabela `TB_PARCEIRO`.
-  * `inserts_participa.sql`: Script de povoamento da tabela de relacionamento `RL_PARTICIPA`.
-  * `plano_1.sql`: Cria um conjunto de índices B-Tree e Hash para otimização.
-  * `plano_2.sql`: Cria um conjunto alternativo de índices B-Tree para otimização.
